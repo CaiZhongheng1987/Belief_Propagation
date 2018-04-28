@@ -68,7 +68,7 @@ llr_data = 2*double(~enc_out)-1;
 % 因为llr=ln(APP(X=0)/APP(X=1))，这里为了简化llr的计算，所以对enc_out做了一个取反动作，然后直接映射成BPSK信号，作为LLR值。
 %% add noise
 noise = randn(size(llr_data))+1j*randn(size(llr_data));
-noise = noise/2.4;% 2.9是调整噪声功率的比值，目的是让BPSK信号既出现纠前误码又不至于超出纠前门限
+noise = noise/2.1;% 2.9是调整噪声功率的比值，目的是让BPSK信号既出现纠前误码又不至于超出纠前门限
 tmp_data = llr_data + noise;
 
 scatterplot(tmp_data(:))
@@ -90,10 +90,11 @@ for grp_idx=1:dec_grp
     V = zeros(size(Hb,1),3); %列为校验矩阵的最大行重3
     APP = reshape(tmp_llr_data,length(Z),size(tmp_llr_data,1)/length(Z));
     tmp_dec_out = zeros(15,1);
-    
+    C = zeros(size(Hb,1),3);
+    C_total = repmat(C,length(Z),1);%每次迭代独立进行，所以需要先将C_total清零
+        
     for iter_idx=1:iter_num
-        C = zeros(size(Hb,1),3);
-        C_total = repmat(C,length(Z),1);%每次迭代独立进行，所以需要先将C_total清零
+        C = zeros(size(Hb,1),3);%每次迭代之前需要先将C清零
         % 更新V的概率信息
         for row_idx = 1:size(Hb,1)% 按Hb逐行更新
             V = zeros(size(Hb,1),3); %列为校验矩阵的最大行重3，因为是不规则的ldpc校验矩阵，所以在每次使用V之前都要先清0一把
